@@ -29,8 +29,11 @@ class Hashids implements HashidsInterface
     protected string $seps = 'cfhistuCFHISTU';
 
     /** @throws \Hashids\HashidsException */
-    public function __construct(string $salt = '', int $minHashLength = 0, string $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
-    {
+    public function __construct(
+        string $salt = '',
+        int $minHashLength = 0,
+        string $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+    ) {
         $this->salt = mb_convert_encoding($salt, 'UTF-8', mb_detect_encoding($salt));
         $this->minHashLength = $minHashLength;
         $alphabet = mb_convert_encoding($alphabet, 'UTF-8', mb_detect_encoding($alphabet));
@@ -146,12 +149,15 @@ class Hashids implements HashidsInterface
         return $ret;
     }
 
-    /** Decode a hash to the original parameter values. */
+    /**
+     * Decode a hash to the original parameter values.
+     * @return array<int, string>
+     */
     public function decode(string $hash): array
     {
         $ret = [];
 
-        if (!is_string($hash) || !($hash = trim($hash))) {
+        if (!($hash = trim($hash))) {
             return $ret;
         }
 
@@ -160,7 +166,7 @@ class Hashids implements HashidsInterface
         $hashBreakdown = str_replace($this->multiByteSplit($this->guards), ' ', $hash);
         $hashArray = explode(' ', $hashBreakdown);
 
-        $i = 3 === count($hashArray) || 2 === \count($hashArray) ? 1 : 0;
+        $i = 3 === count($hashArray) || 2 === count($hashArray) ? 1 : 0;
 
         $hashBreakdown = $hashArray[$i];
 
@@ -192,7 +198,7 @@ class Hashids implements HashidsInterface
     /** Encode hexadecimal values and generate a hash string. */
     public function encodeHex(string $str): string
     {
-        if (!ctype_xdigit((string) $str)) {
+        if (!ctype_xdigit($str)) {
             return '';
         }
 
@@ -212,7 +218,7 @@ class Hashids implements HashidsInterface
         $ret = '';
         $numbers = $this->decode($hash);
 
-        foreach ($numbers as $i => $number) {
+        foreach ($numbers as $number) {
             $ret .= mb_substr(dechex($number), 1);
         }
 
@@ -264,12 +270,8 @@ class Hashids implements HashidsInterface
         return $hash;
     }
 
-    /**
-     * Unhash given input value.
-     *
-     * @return int|string
-     */
-    protected function unhash(string $input, string $alphabet)
+    /** Unhash given input value. */
+    protected function unhash(string $input, string $alphabet): int|string
     {
         $number = 0;
         $inputLength = mb_strlen($input);
@@ -290,7 +292,6 @@ class Hashids implements HashidsInterface
 
     /**
      * Get BC Math or GMP extension.
-     *
      * @throws \RuntimeException
      */
     protected function getMathExtension(): MathInterface
@@ -308,7 +309,6 @@ class Hashids implements HashidsInterface
 
     /**
      * Replace simple use of $this->multiByteSplit with multi byte string.
-     *
      * @return array<int, string>
      */
     protected function multiByteSplit(string $string): array
