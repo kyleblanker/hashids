@@ -18,79 +18,19 @@ use RuntimeException;
 
 class Hashids implements HashidsInterface
 {
-    /**
-     * The seps divider.
-     *
-     * @var float
-     */
-    const SEP_DIV = 3.5;
+    public const GUARD_DIV = 12;
+    public const SEP_DIV = 3.5;
 
-    /**
-     * The guard divider.
-     *
-     * @var float
-     */
-    const GUARD_DIV = 12;
+    protected array $shuffledAlphabets;
+    protected int $minHashLength;
+    protected MathInterface $math;
+    protected string $alphabet;
+    protected string $guards;
+    protected string $salt;
+    protected string $seps = 'cfhistuCFHISTU';
 
-    /**
-     * The alphabet string.
-     *
-     * @var string
-     */
-    protected $alphabet;
-
-    /**
-     * Shuffled alphabets, referenced by alphabet and salt.
-     *
-     * @var array
-     */
-    protected $shuffledAlphabets;
-
-    /**
-     * The seps string.
-     *
-     * @var string
-     */
-    protected $seps = 'cfhistuCFHISTU';
-
-    /**
-     * The guards string.
-     *
-     * @var string
-     */
-    protected $guards;
-
-    /**
-     * The minimum hash length.
-     *
-     * @var int
-     */
-    protected $minHashLength;
-
-    /**
-     * The salt string.
-     *
-     * @var string
-     */
-    protected $salt;
-
-    /**
-     * The math class.
-     *
-     * @var \Hashids\Math\MathInterface
-     */
-    protected $math;
-
-    /**
-     * Create a new hashids instance.
-     *
-     * @param string $salt
-     * @param int $minHashLength
-     * @param string $alphabet
-     *
-     * @throws \Hashids\HashidsException
-     */
-    public function __construct($salt = '', $minHashLength = 0, $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
+    /** @throws \Hashids\HashidsException */
+    public function __construct(string $salt = '', int $minHashLength = 0, string $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
     {
         $this->salt = \mb_convert_encoding($salt, 'UTF-8', \mb_detect_encoding($salt));
         $this->minHashLength = $minHashLength;
@@ -137,9 +77,7 @@ class Hashids implements HashidsInterface
     /**
      * Encode parameters to generate a hash.
      *
-     * @param mixed $numbers
-     *
-     * @return string
+     * @param string|array<int, string> $numbers
      */
     public function encode(...$numbers): string
     {
@@ -209,14 +147,8 @@ class Hashids implements HashidsInterface
         return $ret;
     }
 
-    /**
-     * Decode a hash to the original parameter values.
-     *
-     * @param string $hash
-     *
-     * @return array
-     */
-    public function decode($hash): array
+    /** Decode a hash to the original parameter values. */
+    public function decode(string $hash): array
     {
         $ret = [];
 
@@ -258,14 +190,8 @@ class Hashids implements HashidsInterface
         return $ret;
     }
 
-    /**
-     * Encode hexadecimal values and generate a hash string.
-     *
-     * @param string $str
-     *
-     * @return string
-     */
-    public function encodeHex($str): string
+    /** Encode hexadecimal values and generate a hash string. */
+    public function encodeHex(string $str): string
     {
         if (!\ctype_xdigit((string) $str)) {
             return '';
@@ -281,14 +207,8 @@ class Hashids implements HashidsInterface
         return $this->encode(...$numbers);
     }
 
-    /**
-     * Decode a hexadecimal hash.
-     *
-     * @param string $hash
-     *
-     * @return string
-     */
-    public function decodeHex($hash): string
+    /** Decode a hexadecimal hash. */
+    public function decodeHex(string $hash): string
     {
         $ret = '';
         $numbers = $this->decode($hash);
@@ -300,15 +220,8 @@ class Hashids implements HashidsInterface
         return $ret;
     }
 
-    /**
-     * Shuffle alphabet by given salt.
-     *
-     * @param string $alphabet
-     * @param string $salt
-     *
-     * @return string
-     */
-    protected function shuffle($alphabet, $salt): string
+    /** Shuffle alphabet by given salt. */
+    protected function shuffle(string $alphabet, string $salt): string
     {
         $key = $alphabet . ' ' . $salt;
 
@@ -337,15 +250,8 @@ class Hashids implements HashidsInterface
         return $alphabet;
     }
 
-    /**
-     * Hash given input value.
-     *
-     * @param string $input
-     * @param string $alphabet
-     *
-     * @return string
-     */
-    protected function hash($input, $alphabet): string
+    /** Hash given input value. */
+    protected function hash(string $input, string $alphabet): string
     {
         $hash = '';
         $alphabetLength = \mb_strlen($alphabet);
@@ -362,12 +268,9 @@ class Hashids implements HashidsInterface
     /**
      * Unhash given input value.
      *
-     * @param string $input
-     * @param string $alphabet
-     *
-     * @return int
+     * @return int|string
      */
-    protected function unhash($input, $alphabet)
+    protected function unhash(string $input, string $alphabet)
     {
         $number = 0;
         $inputLength = \mb_strlen($input);
@@ -389,11 +292,7 @@ class Hashids implements HashidsInterface
     /**
      * Get BC Math or GMP extension.
      *
-     * @codeCoverageIgnore
-     *
      * @throws \RuntimeException
-     *
-     * @return \Hashids\Math\MathInterface
      */
     protected function getMathExtension(): MathInterface
     {
@@ -411,11 +310,9 @@ class Hashids implements HashidsInterface
     /**
      * Replace simple use of $this->multiByteSplit with multi byte string.
      *
-     * @param string $string
-     *
      * @return array<int, string>
      */
-    protected function multiByteSplit($string): array
+    protected function multiByteSplit(string $string): array
     {
         return \preg_split('/(?!^)(?=.)/u', $string) ?: [];
     }
