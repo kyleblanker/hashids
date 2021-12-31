@@ -200,7 +200,7 @@ class Hashids implements HashidsInterface
             $alphabet = $this->shuffle($alphabet, $alphabet);
             $ret = \mb_substr($alphabet, $halfLength) . $ret . \mb_substr($alphabet, 0, $halfLength);
 
-            $excess = \mb_strlen($ret) - $this->minHashLength;
+            $excess = \mb_strlen($ret) - (int)$this->minHashLength;
             if ($excess > 0) {
                 $ret = \mb_substr($ret, (int) ($excess / 2), $this->minHashLength);
             }
